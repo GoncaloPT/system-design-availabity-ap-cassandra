@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  cassandra-node1:
+    image: cassandra:latest
+    container_name: cassandra-node1
+    environment:
+      CASSANDRA_SEEDS: cassandra-node1
+      CASSANDRA_CLUSTER_NAME: "TestCluster"
+      CASSANDRA_DC: "datacenter1"
+      CASSANDRA_RACK: "rack1"
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      CASSANDRA_START_RPC: true
+      CASSANDRA_RPC_ADDRESS: 0.0.0.0
+      CASSANDRA_LISTEN_ADDRESS: auto
+    ports:
+      - "9042:9042" # Expose Cassandra's CQL port
+    restart:
+      on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool status" ]
+      interval: 2m
+      start_period: 2m
+      timeout: 10s
+      retries: 3
+
+
+  cassandra-node2:
+    image: cassandra:latest
+    container_name: cassandra-node2
+    environment:
+      CASSANDRA_SEEDS: cassandra-node1
+      CASSANDRA_CLUSTER_NAME: "TestCluster"
+      CASSANDRA_DC: "datacenter1"
+      CASSANDRA_RACK: "rack1"
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      CASSANDRA_START_RPC: true
+      CASSANDRA_RPC_ADDRESS: 0.0.0.0
+      CASSANDRA_LISTEN_ADDRESS: auto
+    ports:
+      - "9043:9042" # Expose Cassandra's CQL port
+    depends_on:
+      - cassandra-node1
+
+
+  cassandra-node3:
+    image: cassandra:latest
+    container_name: cassandra-node3
+    environment:
+      CASSANDRA_SEEDS: cassandra-node1
+      CASSANDRA_CLUSTER_NAME: "TestCluster"
+      CASSANDRA_DC: "datacenter1"
+      CASSANDRA_RACK: "rack1"
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      CASSANDRA_START_RPC: true
+      CASSANDRA_RPC_ADDRESS: 0.0.0.0
+      CASSANDRA_LISTEN_ADDRESS: auto
+    depends_on:
+      - cassandra-node1
+      - cassandra-node2
